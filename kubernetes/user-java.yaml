@@ -4,6 +4,7 @@ metadata:
   name: user-java-service
   labels:
     app: user-java
+  namespace: api
 spec:
   ports:
     - port: 80
@@ -16,7 +17,7 @@ metadata:
   name: user-java-deployment
   labels:
     app: user-java-deployment
-    namespace: api
+  namespace: api
 spec:
   replicas: 2
   selector:
@@ -26,7 +27,7 @@ spec:
     metadata:
       labels:
         app: user-java
-        namespace: api
+      namespace: api
     spec:
       containers:
       - name: user-java
