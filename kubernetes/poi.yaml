@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poi-deployment
+  labels:
+    app: poi-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poi
+  template:
+    metadata:
+      labels:
+        app: poi
+    spec:
+      containers:
+      - name: poi
+        image: registrytjp0542.azurecr.io/tripinsights/poi:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: SQL_USER
+          value: sqladmintJp0542
+        - name: SQL_PASSWORD
+          value: kZ1hn0Mg2
+        - name: SQL_SERVER
+          value: sqlservertjp0542.database.windows.net

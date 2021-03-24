@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: userprofile-service
+  labels:
+    app: userprofile
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: userprofile
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userprofile-deployment
+  labels:
+    app: userprofile
+spec:
+  selector:
+    matchLabels:
+      app: userprofile
+  template:
+    metadata:
+      labels:
+        app: userprofile
+    spec:
+      containers:
+      - image: registrytjp0542.azurecr.io/tripinsights/userprofile:1.0
+        name: userprofile
+        ports:
+        - containerPort: 80
+          name: userprofile
+        env:
+        - name: SQL_USER
+          value: sqladmintJp0542
+        - name: SQL_PASSWORD
+          value: kZ1hn0Mg2
+        - name: SQL_SERVER
+          value: sqlservertjp0542.database.windows.net

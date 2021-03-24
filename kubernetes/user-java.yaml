@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-java-service
+  labels:
+    app: user-java
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: user-java
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-java-deployment
+  labels:
+    app: user-java-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-java
+  template:
+    metadata:
+      labels:
+        app: user-java
+    spec:
+      containers:
+      - name: user-java
+        image: registrytjp0542.azurecr.io/tripinsights/user_java:1.0
+        ports:
+        - containerPort: 80
+        env:
+        - name: SQL_USER
+          value: sqladmintJp0542
+        - name: SQL_PASSWORD
+          value: kZ1hn0Mg2
+        - name: SQL_SERVER
+          value: sqlservertjp0542.database.windows.net
+        - name: SQL_DBNAME
+          value: mydrivingDB
