@@ -33,10 +33,14 @@ spec:
         ports:
         - containerPort: 80
           name: userprofile
-        env:
-        - name: SQL_USER
-          value: sqladmintJp0542
-        - name: SQL_PASSWORD
-          value: kZ1hn0Mg2
-        - name: SQL_SERVER
-          value: sqlservertjp0542.database.windows.net
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/secrets"
+          readOnly: true
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-kvname"
