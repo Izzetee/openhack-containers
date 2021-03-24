@@ -37,6 +37,6 @@ spec:
           name: tripviewer
         env:
         - name: USERPROFILE_API_ENDPOINT
-          value: "http://userprofile-service.default.svc.cluster.local"
+          value: "http://userprofile-service.api.svc.cluster.local"
         - name: TRIPS_API_ENDPOINT
-          value: "http://trips.default.svc.cluster.local"
+          value: "http://trips.api.svc.cluster.local"
