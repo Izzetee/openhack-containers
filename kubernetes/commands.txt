@@ -1,0 +1,41 @@
+docker network create appnetwork
+docker run --name db --network appnetwork -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=blubber123!" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest
+
+
+#create database
+- docker exec -it db "bash"
+-  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "blubber123!"
+CREATE DATABASE mydrivingDB
+SELECT Name from sys.Databases
+go
+
+docker run --network appnetwork --name application -e ASPNETCORE_ENVIRONMENT=Local -e SQLFQDN=db -e 'SQLUSER=SA' -e 'SQLPASS=blubber123!' -e SQLDB=mydrivingDB openhack/data-load:v1
+
+cd openhack-containers
+# build "point of interest" (POI) API image
+
+cd src/poi
+docker build -f ../../dockerfiles/Dockerfile_3 -t "tripinsights/poi:1.0" .
+
+docker run -d -p 80:80 --name poi --network appnetwork -e ASPNETCORE_ENVIRONMENT=Local poi
+
+
+docker tag tripinsights/tripviewer:1.0 registrytjp0542.azurecr.io/tripinsights/tripviewer:1.0
+ocker push registrytjp0542.azurecr.io/tripinsights/tripviewer:1.0
+
+ az keyvault create -n awesomeKeyVault -g TeamTwoRG --location northeurope
+
+helm repo add csi-secrets-store-provider-azure https://raw.githubusercontent.com/Azure/secrets-store-csi-driver-provider-azure/master/charts
+helm install csi csi-secrets-store-provider-azure/csi-secrets-store-provider-azure
+
+
+az keyvault secret set --vault-name awesomeKeyVault --name azure-sql-fdqn --value "sqlservertjp0542.database.windows.net"
+az keyvault secret set --vault-name awesomeKeyVault --name azure-sql-user --value "sqladmintJp0542"
+az keyvault secret set --vault-name awesomeKeyVault --name azure-sql-pass --value "kZ1hn0Mg2"
+az keyvault secret set --vault-name awesomeKeyVault --name azure-sql-database --value "mydrivingDB"
+
+
+export SERVICE_PRINCIPAL_CLIENT_SECRET="$(az ad sp create-for-rbac --skip-assignment --name http://secrets-store-test --query 'password' -otsv)"
+export SERVICE_PRINCIPAL_CLIENT_ID="$(az ad sp show --id http://secrets-store-test --query 'appId' -otsv)"
+
+az keyvault set-policy -n awesomeKeyVault --secret-permissions get --spn 4c2ec77b-8c1a-422f-bc3c-f598a96c2ed4
