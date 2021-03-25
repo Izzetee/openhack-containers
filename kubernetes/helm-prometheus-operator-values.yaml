@@ -1,0 +1,45 @@
+# Depending on which DNS solution you have installed in your cluster enable the right exporter
+coreDns:
+  enabled: true
+
+kubeDns:
+  enabled: false
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+prometheus:
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+grafana:
+  adminPassword: "YourPass123#" #std admin is 'admin'
+  ingress:
+    enabled: true
+    # expose the grafana server at /grafana
+    path: /grafana
+    # Assign a DNS name to the public IP used by the ingress controller
+    # It can be found in the MC_* resource group
+    hosts:
+      - ohcontainer.westeurope.cloudapp.azure.com
+  grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
+      serve_from_sub_path: true
+  persistence:
+    enabled: true
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
