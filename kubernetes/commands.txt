@@ -39,3 +39,35 @@ export SERVICE_PRINCIPAL_CLIENT_SECRET="$(az ad sp create-for-rbac --skip-assign
 export SERVICE_PRINCIPAL_CLIENT_ID="$(az ad sp show --id http://secrets-store-test --query 'appId' -otsv)"
 
 az keyvault set-policy -n awesomeKeyVault --secret-permissions get --spn 4c2ec77b-8c1a-422f-bc3c-f598a96c2ed4
+
+kubectl create namespace ingress
+
+helm install nginx-ingress ingress-nginx/ingress-nginx \
+    --namespace ingress \
+    --set controller.replicaCount=3 \
+    --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
+    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
+
+
+
+kubectl get services --namespace ingress -w
+
+EXTERNAL-IP = 20.54.32.197
+
+AKS_ID=$(az aks show --resource-group TeamTwoRG --name awesomecluster --query id -o tsv)
+
+API_DEV_ID=$(az ad group create --display-name api-dev --mail-nickname api-dev --query objectId -o tsv)
+WEB_DEV_ID=$(az ad group create --display-name web-dev --mail-nickname web-dev --query objectId -o tsv)
+
+az role assignment create --assignee $API_DEV_ID --role "Azure Kubernetes Service Cluster User Role" --scope $AKS_ID
+az role assignment create --assignee $WEB_DEV_ID --role "Azure Kubernetes Service Cluster User Role" --scope $AKS_ID
+
+az ad group show --group api-dev --query objectId -o tsv
+az ad group show --group web-dev --query objectId -o tsv
+
+
+kubectl get clusterroles --all-namespaces
+
+kubectl delete -n api rolebinding api-edit-access
+
+kubectl get roles --all-namespaces
